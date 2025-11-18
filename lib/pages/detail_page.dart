@@ -47,16 +47,16 @@ class _DetailPageState extends State<DetailPage> {
     final cartBox = Hive.box<CartItemModel>('cartBox');
 
     final newItem = CartItemModel(
-      idMeal: widget.item['idMeal'] ?? UniqueKey().toString(),
-      strMeal: widget.item['strMeal'] ?? 'Unknown Item',
-      strMealThumb: widget.item['strMealThumb'] ?? '',
+      id: widget.item['idMeal'] ?? UniqueKey().toString(),
+      title: widget.item['strMeal'] ?? 'Unknown Item',
+      image: widget.item['strMealThumb'] ?? '',
       quantity: _quantity,
       price: _itemPrice,
       userEmail: widget.currentUserEmail,
     );
 
     final existingItemIndex = cartBox.values.toList().indexWhere(
-      (e) => e.idMeal == newItem.idMeal && e.userEmail == newItem.userEmail,
+      (e) => e.id == newItem.id && e.userEmail == newItem.userEmail,
     );
 
     if (existingItemIndex != -1) {
@@ -70,7 +70,7 @@ class _DetailPageState extends State<DetailPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          '${_quantity}x ${newItem.strMeal} ditambahkan ke keranjang!',
+          '${_quantity}x ${newItem.title} ditambahkan ke keranjang!',
         ),
         backgroundColor: darkPrimaryColor,
       ),

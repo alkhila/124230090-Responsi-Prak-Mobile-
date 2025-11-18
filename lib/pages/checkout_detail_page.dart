@@ -213,7 +213,7 @@ class _ReceiptPageState extends State<ReceiptPage> {
                             (item) => Padding(
                               padding: const EdgeInsets.only(left: 8.0),
                               child: Text(
-                                '${item.strMeal} (${item.quantity}x) - Rp ${(item.price * item.quantity).toStringAsFixed(0)}',
+                                '${item.title} (${item.quantity}x) - Rp ${(item.price * item.quantity).toStringAsFixed(0)}',
                                 style: const TextStyle(fontSize: 13),
                               ),
                             ),
@@ -458,7 +458,7 @@ class _CheckoutDetailPageState extends State<CheckoutDetailPage> {
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            '${item.strMeal} (${item.quantity}x)',
+                                            '${item.title} (${item.quantity}x)',
                                             style: const TextStyle(
                                               fontSize: 14,
                                             ),

@@ -78,7 +78,7 @@ class _CartItemInteractiveState extends State<_CartItemInteractive> {
       widget.item.quantity--;
       widget.item.save();
     } else {
-      _confirmDelete(context, widget.index, widget.item.strMeal);
+      _confirmDelete(context, widget.index, widget.item.title);
     }
   }
 
@@ -121,10 +121,10 @@ class _CartItemInteractiveState extends State<_CartItemInteractive> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(15),
-              child: item.strMealThumb.startsWith('assets/')
-                  ? Image.asset(item.strMealThumb, fit: BoxFit.cover)
+              child: item.image.startsWith('assets/')
+                  ? Image.asset(item.image, fit: BoxFit.cover)
                   : Image.network(
-                      item.strMealThumb,
+                      item.image,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           const Center(child: Icon(Icons.broken_image)),
@@ -138,7 +138,7 @@ class _CartItemInteractiveState extends State<_CartItemInteractive> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.strMeal,
+                  item.title,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,

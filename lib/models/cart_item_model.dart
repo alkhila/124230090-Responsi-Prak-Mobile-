@@ -5,13 +5,13 @@ part 'cart_item_model.g.dart';
 @HiveType(typeId: 3)
 class CartItemModel extends HiveObject {
   @HiveField(0)
-  late String idMeal;
+  late String id;
 
   @HiveField(1)
-  late String strMeal;
+  late String title;
 
   @HiveField(2)
-  late String strMealThumb;
+  late String image;
 
   @HiveField(3)
   late int quantity;
@@ -23,9 +23,9 @@ class CartItemModel extends HiveObject {
   late String userEmail;
 
   CartItemModel({
-    required this.idMeal,
-    required this.strMeal,
-    required this.strMealThumb,
+    required this.id,
+    required this.title,
+    required this.image,
     required this.quantity,
     required this.price,
     required this.userEmail,

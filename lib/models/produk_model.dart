@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class ProdukModel {
   final int id;
   final String title;
@@ -17,12 +19,12 @@ class ProdukModel {
 
   factory ProdukModel.fromJson(Map<String, dynamic> j) {
     return ProdukModel(
-      id: j['id'],
+      id: int.tryParse(j['id'].toString()) ?? 0,
       title: j['title'] ?? 'No Title',
-      price: j['price'] ?? '0',
+      price: int.tryParse(j['price'].toString()) ?? 0,
       description: j['description'] ?? 'No Description',
       image: j['image'] ?? '',
-      rating: j['rating']?['rate'] ?? '0',
+      rating: int.tryParse(j['rating']?['rate'].toString() ?? '0') ?? 0,
     );
   }
 }
