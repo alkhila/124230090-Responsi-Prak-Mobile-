@@ -33,12 +33,20 @@ class _DetailPageState extends State<DetailPage> {
 
     var priceData = widget.item['price'];
 
+    // KOREKSI: Pastikan _basePrice diinisialisasi sebagai double yang benar
     if (priceData is double) {
       _basePrice = priceData;
     } else if (priceData is int) {
       _basePrice = priceData.toDouble();
     } else {
-      _basePrice = 0.0;
+      var priceAlias = widget.item['price'] ?? 0.0;
+      if (priceAlias is double) {
+        _basePrice = priceAlias;
+      } else if (priceAlias is int) {
+        _basePrice = priceAlias.toDouble();
+      } else {
+        _basePrice = 0.0;
+      }
     }
     _itemPrice = _basePrice;
   }
@@ -47,8 +55,8 @@ class _DetailPageState extends State<DetailPage> {
     final cartBox = Hive.box<CartItemModel>('cartBox');
 
     final newItem = CartItemModel(
-      id: widget.item['idMeal'] ?? UniqueKey().toString(),
-      title: widget.item['strMeal'] ?? 'Unknown Item',
+      id: widget.item['id']?.toString() ?? UniqueKey().toString(),
+      title: widget.item['title'] ?? 'Unknown Item',
       image: widget.item['strMealThumb'] ?? '',
       quantity: _quantity,
       price: _itemPrice,
@@ -95,12 +103,10 @@ class _DetailPageState extends State<DetailPage> {
   @override
   Widget build(BuildContext context) {
     final item = widget.item;
-    final isLocalAsset =
-        (item['type'] == 'Minuman' &&
-        (item['strMealThumb'] as String).startsWith('assets/'));
-    final imageUrl = isLocalAsset
-        ? item['strMealThumb']
-        : item['strMealThumb'] ?? 'https://via.placeholder.com/250';
+
+    final isLocalAsset = false;
+
+    final imageUrl = item['strMealThumb'] ?? 'https://via.placeholder.com/250';
 
     return Scaffold(
       backgroundColor: lightBackgroundColor,
@@ -125,14 +131,12 @@ class _DetailPageState extends State<DetailPage> {
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.45,
             width: double.infinity,
-            child: isLocalAsset
-                ? Image.asset(imageUrl, fit: BoxFit.cover)
-                : Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Center(child: Icon(Icons.broken_image, size: 80)),
-                  ),
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Center(child: Icon(Icons.broken_image, size: 80)),
+            ),
           ),
 
           Align(
@@ -152,7 +156,7 @@ class _DetailPageState extends State<DetailPage> {
                     children: [
                       Expanded(
                         child: Text(
-                          item['strMeal'] ?? 'Unknown Item',
+                          item['title'] ?? 'Unknown Item',
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -164,10 +168,12 @@ class _DetailPageState extends State<DetailPage> {
                       ),
                     ],
                   ),
+
                   Text(
-                    'Kategori: ${item['type'] ?? 'N/A'}',
+                    'Kategori: ${item['category'] ?? 'Produk Umum'}', // Coba ambil category dari API
                     style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
+
                   const Divider(height: 30),
 
                   Text(
@@ -219,7 +225,8 @@ class _DetailPageState extends State<DetailPage> {
                   Expanded(
                     child: SingleChildScrollView(
                       child: Text(
-                        'Aplikasi ini adalah tugas akhir Pemrograman Aplikasi Mobile (PAM). Menu yang ditampilkan berasal dari API TheMealDB dan data statis. Harga yang tertera adalah harga simulasi. Menu yang Anda pilih siap disajikan dengan cepat dan nikmat!',
+                        item['description'] ??
+                            'Aplikasi ini adalah tugas akhir Pemrograman Aplikasi Mobile (PAM). Menu yang ditampilkan berasal dari API TheMealDB dan data statis. Harga yang tertera adalah harga simulasi. Menu yang Anda pilih siap disajikan dengan cepat dan nikmat!',
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.black87,

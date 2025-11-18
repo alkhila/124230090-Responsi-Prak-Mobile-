@@ -8,12 +8,11 @@ import 'detail_page.dart';
 import 'login_page.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'checkout_detail_page.dart';
+import '../models/produk_model.dart';
 
 const Color darkPrimaryColor = Color(0xFF703B3B);
 const Color secondaryAccentColor = Color(0xFFA18D6D);
 const Color lightBackgroundColor = Color(0xFFE1D0B3);
-
-enum MenuFilter { all, makanan, minuman }
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,7 +31,6 @@ class _HomePageState extends State<HomePage> {
   final LocationService _locationService = LocationService();
 
   String _searchQuery = '';
-  MenuFilter _currentFilter = MenuFilter.all;
 
   @override
   void initState() {
@@ -151,6 +149,174 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
+
+        Expanded(
+          child: FutureBuilder<List<dynamic>>(
+            future: _menuFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(color: darkPrimaryColor),
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'Error: ${snapshot.error}',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                );
+              } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                final rawMenuList = snapshot.data!;
+
+                List<dynamic> filteredList = rawMenuList.where((item) {
+                  final Map<String, dynamic> itemMap = (item as ProdukModel)
+                      .toJson();
+
+                  final String itemName = itemMap['title']?.toLowerCase() ?? '';
+                  final bool matchesSearch = itemName.contains(
+                    _searchQuery.toLowerCase(),
+                  );
+
+                  return matchesSearch;
+                }).toList();
+
+                if (filteredList.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'Menu tidak ditemukan.',
+                      style: TextStyle(color: darkPrimaryColor),
+                    ),
+                  );
+                }
+
+                return GridView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: 15,
+                    mainAxisSpacing: 15,
+                  ),
+                  itemCount: filteredList.length,
+                  itemBuilder: (context, index) {
+                    final item = filteredList[index] as ProdukModel;
+                    final itemMap = item.toJson();
+
+                    final isLocalAsset = false;
+
+                    return InkWell(
+                      onTap: () => _openDetailPage(itemMap),
+                      borderRadius: BorderRadius.circular(15),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: darkPrimaryColor.withOpacity(0.1),
+                              spreadRadius: 1,
+                              blurRadius: 3,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(15),
+                                ),
+                                child: Image.network(
+                                  itemMap['strMealThumb'] ??
+                                      'https://via.placeholder.com/150',
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  10,
+                                  8,
+                                  10,
+                                  8,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          itemMap['strMeal'] ?? 'Nama Menu',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: darkPrimaryColor,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Rp ${itemMap['price']?.toStringAsFixed(0) ?? 'N/A'}',
+                                          style: const TextStyle(
+                                            color: darkPrimaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+
+                                        Container(
+                                          padding: const EdgeInsets.all(5),
+                                          decoration: BoxDecoration(
+                                            color: darkPrimaryColor,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.add,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              } else {
+                return Center(
+                  child: Text(
+                    'Tidak ada menu yang tersedia.',
+                    style: TextStyle(color: darkPrimaryColor),
+                  ),
+                );
+              }
+            },
+          ),
+        ),
       ],
     );
   }
@@ -249,35 +415,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String label, MenuFilter filter) {
-    bool isSelected = _currentFilter == filter;
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      selectedColor: darkPrimaryColor,
-      onSelected: (selected) {
-        if (selected) {
-          setState(() {
-            _currentFilter = filter;
-          });
-        }
-      },
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : darkPrimaryColor,
-        fontWeight: FontWeight.bold,
-      ),
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: BorderSide(
-          color: isSelected
-              ? darkPrimaryColor
-              : secondaryAccentColor.withOpacity(0.5),
         ),
       ),
     );
