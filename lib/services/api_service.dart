@@ -10,11 +10,11 @@ class ApiService {
   Future<List<dynamic>> fetchMenu() async {
     final res = await http.get(Uri.parse(_baseUrl));
     if (res.statusCode == 200) {
-      final j = json.decode(res.body);
+      final List j = json.decode(res.body);
 
-      return (j as List).map((e) => ProdukModel.fromJson(e)).toList();
+      return j.map((json) => ProdukModel.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to load menu');
+      throw Exception('Failed to load products');
     }
   }
 }
